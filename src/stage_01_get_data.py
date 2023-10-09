@@ -3,7 +3,7 @@ import os
 import shutil
 from tqdm import tqdm
 import logging
-from src.utils.common import read_yaml, create_directories
+from src.utils.common import read_yaml, create_directories,unzip_file
 import random
 import urllib.request as req
 
@@ -36,6 +36,14 @@ def main(config_path):
     #params = read_yaml(params_path)
     else:
         logging.info(f"data file already exists at: {data_file_path}")
+
+    unzip_data_dir = config["data"]["unzip_data_dir"]
+    if not os.path.exists(unzip_data_dir):
+        create_directories([unzip_data_dir])
+        unzip_file(source=data_file_path, dest=unzip_data_dir)
+    
+    else:
+        logging.info(f"unzip_data_dir already exists at: {unzip_data_dir}")
 
 
 if __name__ == '__main__':

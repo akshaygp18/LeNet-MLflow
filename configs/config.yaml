@@ -3,4 +3,5 @@ data:
   source_url: "https://www.kaggle.com/datasets/oddrationale/mnist-in-csv/download?datasetVersionNumber=2"
   local_dir: data
   data_file: data.zip
-  
+  unzip_data_dir: data
+
