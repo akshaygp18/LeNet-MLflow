@@ -10,6 +10,6 @@ echo [$(date)]: "export conda environment"
 conda env export > conda.yaml
 echo [$(date)]: "END"
 
-# to remove everything -
+## to remove everything -
 # rm -rf env/ .gitignore conda.yaml README.md .git/
 
