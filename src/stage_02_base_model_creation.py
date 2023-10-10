@@ -28,17 +28,34 @@ def main(config_path):
 
     LAYERS = [
     tf.keras.layers.Input(shape=tuple(params["img_shape"])),
-    tf.keras.layers.Conv2D(filters=32, kernel_size=(3,3), activation="relu"),
-    tf.keras.layers.MaxPool2D(pool_size=(2,2)),
-    tf.keras.layers.Conv2D(32, (3,3), activation="relu"),
-    tf.keras.layers.MaxPool2D(pool_size=(2,2)),
-    tf.keras.layers.Flatten(),
-    tf.keras.layers.Dropout(0.5),
+    tf.keras.layers.Conv2D(filters=28, kernel_size=(5,5), activation="tanh"),
+    tf.keras.layers.AveragePooling2D(pool_size=(2,2)),
+    tf.keras.layers.Conv2D(10, (5,5), activation="tanh"),
+    tf.keras.layers.AveragePooling2D(pool_size=(2,2)),
+    tf.keras.layers.Conv2D(120, (5,5), activation="tanh"),
+    tf.keras.layers.Dense(84, activation="tanh"),
     tf.keras.layers.Dense(10, activation="softmax")
     ] 
 
+
+
     classifier = tf.keras.Sequential(LAYERS) 
-    pass
+    
+    logging.info(f"base model summary:\n{log_model_summary(classifier)}")
+
+    classifier.compile(
+    optimizer=tf.keras.optimizers.experimental.SGD(params["lr"]),
+    loss=params["loss"],
+    metrics=params["metrics"]
+    )
+
+    path_to_model_dir = os.path.join(
+        config["data"]["local_dir"],
+        config["data"]["model_dir"])
+    create_directories([path_to_model_dir])
+    path_to_model = os.path.join(path_to_model_dir,config["data"]["init_model_file"])
+    classifier.save(path_to_model)
+    logging.info(f"model is saved at: {path_to_model}")
 
 
 if __name__ == '__main__':
