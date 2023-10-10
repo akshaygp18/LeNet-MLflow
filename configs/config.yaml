@@ -5,8 +5,9 @@ data:
   train_labels_dir: data/train_labels.npy
   test_images_dir: data/test_images.npy
   test_labels_dir: data/test_labels.npy
-
-
+  model_dir: model
+  init_model_file: init_model.h5 
+  
 params:
   img_shape: [180,180,3]
   lr: 0.001
