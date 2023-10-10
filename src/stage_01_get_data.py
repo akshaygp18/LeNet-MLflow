@@ -3,60 +3,61 @@ import os
 import shutil
 from tqdm import tqdm
 import logging
-from src.utils.common import read_yaml, create_directories,unzip_file
+from src.utils.common import read_yaml, create_directories, unzip_file
+from src.utils.data_mgmt import load_mnist_data
 import random
-import urllib.request as req
+import numpy as np
 
-
-STAGE = "GET_DATA" ## <<< change stage name 
+STAGE = "GET_DATA"
 
 logging.basicConfig(
-    filename=os.path.join("logs", 'running_logs.log'), 
-    level=logging.INFO, 
+    filename=os.path.join("logs", 'running_logs.log'),
+    level=logging.INFO,
     format="[%(asctime)s: %(levelname)s: %(module)s]: %(message)s",
     filemode="a"
-    )
-
+)
 
 def main(config_path):
-    ## read config files
     config = read_yaml(config_path)
-    URL = config["data"]["source_url"]
+
+    train_images, train_labels, test_images, test_labels = load_mnist_data()
+    logging.info("Loaded train_images, train_labels, test_images, test_labels")
+
     local_dir = config["data"]["local_dir"]
     create_directories([local_dir])
-    
-    data_file = config["data"]["data_file"]
-    data_file_path = os.path.join(local_dir, data_file)
 
-    
-    if not os.path.isfile(data_file_path):
-        logging.info("Downloading started....")
-        filename, headers = req.urlretrieve(URL, data_file_path)
-        logging.info(f"filename:\n{filename} created with info \n{headers}")
-    #params = read_yaml(params_path)
-    else:
-        logging.info(f"data file already exists at: {data_file_path}")
+    train_images_dir = config["data"]["train_images_dir"]
+    train_labels_dir = config["data"]["train_labels_dir"]
+    test_images_dir = config["data"]["test_images_dir"]
+    test_labels_dir = config["data"]["test_labels_dir"]
 
-    unzip_data_dir = config["data"]["unzip_data_dir"]
-    if not os.path.exists(unzip_data_dir):
-        create_directories([unzip_data_dir])
-        unzip_file(source=data_file_path, dest=unzip_data_dir)
-    
-    else:
-        logging.info(f"unzip_data_dir already exists at: {unzip_data_dir}")
+    # Debugging: Check directory paths
+    logging.info(f"train_images_dir: {train_images_dir}")
+    logging.info(f"train_labels_dir: {train_labels_dir}")
+    logging.info(f"test_images_dir: {test_images_dir}")
+    logging.info(f"test_labels_dir: {test_labels_dir}")
 
+    create_directories([train_images_dir, train_labels_dir, test_images_dir, test_labels_dir])
+
+    # Save train images
+    np.save(os.path.join(train_images_dir, "train_images.npy"), train_images)
+    # Save train labels
+    np.save(os.path.join(train_labels_dir, "train_labels.npy"), train_labels)
+    # Save test images
+    np.save(os.path.join(test_images_dir, "test_images.npy"), test_images)
+    # Save test labels
+    np.save(os.path.join(test_labels_dir, "test_labels.npy"), test_labels)
 
 if __name__ == '__main__':
     args = argparse.ArgumentParser()
     args.add_argument("--config", "-c", default="configs/config.yaml")
-    # args.add_argument("--params", "-p", default="params.yaml")
     parsed_args = args.parse_args()
 
     try:
         logging.info("\n********************")
         logging.info(f">>>>> stage {STAGE} started <<<<<")
         main(config_path=parsed_args.config)
-        logging.info(f">>>>> stage {STAGE} completed!<<<<<\n")
+        logging.info(f">>>>> stage {STAGE} completed! <<<<<\n")
     except Exception as e:
         logging.exception(e)
         raise e
